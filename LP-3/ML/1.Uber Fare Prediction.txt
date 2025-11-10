@@ -1,0 +1,49 @@
+#prerequisites
+import pandas as pd 
+import numpy as np 
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble  import RandomForestRegressor
+from sklearn.metrics import mean_squared_error ,r2_score
+df = pd.read_csv("uber.csv")
+df.head()
+ 
+#data preprocessing
+df= df.drop(columns=["Unnamed: 0","key"])
+df.head()
+df["pickup_datetime"] = pd.to_datetime(df["pickup_datetime"])
+df.dropna(inplace=True)
+df.head()
+df= df[(df["fare_amount"] > 0) & (df["passenger_count"] > 0) & (df["passenger_count"] < 6)]
+df.head()
+
+#input-output features 
+x = df.drop("fare_amount",axis=1)
+y = df["fare_amount"]
+x["pickup_datetime"] = pd.to_numeric(x["pickup_datetime"])
+
+#dividing the dateaset
+x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=42)
+
+#Linear Regression Model
+linearRegressionModel = LinearRegression()
+#test the model 
+linearRegressionModel.fit(x_train,y_train)
+#make predictions
+y_pred= linearRegressionModel.predict(x_test)
+#evaluate the results of the model 
+rmse = np.sqrt(mean_squared_error(y_test,y_pred))
+r2=r2_score(y_test,y_pred)
+print("RMSE SCORE OF LINEAR REGRESSION MODEL : ",rmse)
+print("R2 SCORE OF LINEAR REGRESSION MODEL : ",r2)
+
+
+#Random Forest 
+randomForestModel  = RandomForestRegressor(n_estimators=10,random_state=42)
+randomForestModel.fit(x_train,y_train)
+yy_pred=randomForestModel.predict(x_test)
+rmse2 = np.sqrt(mean_squared_error(y_test,yy_pred))
+r22 = r2_score(y_test,yy_pred)
+print("RMSE SCORE OF Random Forest Regressor Model: ",rmse2)
+print("R2 SCORE OF Random Forest Regressor MODEL : ",r22)

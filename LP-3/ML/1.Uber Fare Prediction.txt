@@ -18,6 +18,29 @@ df.head()
 df= df[(df["fare_amount"] > 0) & (df["passenger_count"] > 0) & (df["passenger_count"] < 6)]
 df.head()
 
+
+#identifying outkiers
+plt.boxplot(df["fare_amount"])
+plt.title("Box Plot to detect outliers")
+plt.ylabel("Fare Amount")
+plt.show()
+
+#via IQR
+Q1 = df["fare_amount"].quantile(0.25)
+Q3 = df["fare_amount"].quantile(0.75) 
+IQR =  Q3 -Q1
+lower = Q1 - 1.5 * IQR
+upper = Q3 + 1.5 * IQR 
+outliers = df[(df["fare_amount"] < lower) | (df["fare_amount"] > upper)]
+print("Outliers : ",outliers)
+
+#removing outliers 
+df=df[(df["fare_amount"] >= lower) & (df["fare_amount"] <= upper)]
+#identifying outliers(via box plot)
+plt.boxplot(df["fare_amount"])
+plt.title("Box Plot to detect outliers")
+plt.xlabel("Fare Amount")
+plt.show() 
 #input-output features 
 x = df.drop("fare_amount",axis=1)
 y = df["fare_amount"]

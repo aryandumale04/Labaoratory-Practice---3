@@ -1,0 +1,47 @@
+#prerequisites
+import pandas as pd
+import numpy as np 
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, classification_report ,confusion_matrix
+df =  pd.read_csv("emails.csv")
+df.head()
+import warnings
+warnings.filterwarnings("ignore")
+
+
+
+#data splitting and then scaling
+x = df.iloc[:,1:3001]
+y = df.iloc[:, -1].values
+x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.2,random_state=42)
+
+#scaling
+scaler = StandardScaler()
+x_train = scaler.fit_transform(x_train)
+x_test=scaler.transform(x_test)
+
+
+
+#svc
+svc = SVC(kernel="rbf",C=1.0,gamma="auto")
+svc.fit(x_train,y_train)
+y_svc_pred=svc.predict(x_test)
+
+
+#evaluation of svc 
+print("Accuracy of SVC : ", accuracy_score(y_test,y_svc_pred))
+print("Classification Report of SVC : ", classification_report(y_test,y_svc_pred))
+print("Confusion Matrix of SVC : ", confusion_matrix(y_test,y_svc_pred))
+
+#kNeighbors Classifier 
+kNN = KNeighborsClassifier(n_neighbors=7)
+kNN.fit(x_train,y_train)
+y_KNN_pred=kNN.predict(x_test)
+
+#evaluation
+print("Accuracy of KNN : ", accuracy_score(y_test,y_KNN_pred))
+print("Classification Report of KNN : ", classification_report(y_test,y_KNN_pred))
+print("Confusion Matrix of KNN : ", confusion_matrix(y_test,y_KNN_pred))

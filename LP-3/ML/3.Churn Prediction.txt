@@ -1,24 +1,32 @@
 #prerequisites
 import pandas as pd
 import numpy as np
+import seaborn as sns
 import warnings
 warnings.filterwarnings("ignore")
-df= pd.read_csv("Churn_Modelling.csv")
+print(sns.get_dataset_names())
+data = sns.load_dataset("titanic")
+df=pd.DataFrame(data)
+df
+
+df=df[["survived","pclass","sex","age","fare"]]
+df.dropna(inplace=True)
 df
 
 
+
+
 #divide the dataset 
-x=df.iloc[:,3:13]
-y=df.iloc[:,13]
+x=df.drop("survived",axis=1)
+y=df["survived"]
 
 #endcoding 
 from sklearn.preprocessing import LabelEncoder
 
 
 labelEncoder = LabelEncoder()
-x["Gender"] = labelEncoder.fit_transform(x["Gender"])
-#one-hot
-x = pd.get_dummies(x,columns=["Geography"],drop_first=True)
+x["sex"] = labelEncoder.fit_transform(x["sex"])
+
 
 #split the data and then notrmalise it 
 from sklearn.model_selection import train_test_split
@@ -29,7 +37,21 @@ scaler = StandardScaler()
 x_train=scaler.fit_transform(x_train)
 x_test=scaler.transform(x_test)
 
+
+#build the neural network
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense,Dropout
+model = Sequential()
+model.add(Dense(units=6, activation="relu", input_dim=x_train.shape[1]))
+model.add(Dropout(0.3))
+model.add(Dense(units=6, activation="relu"))
+model.add(Dense(units=1,activation="sigmoid"))
+model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"] )
+
+
 history=model.fit(x_train,y_train,epochs=20,batch_size=32,validation_data=(x_test,y_test))
+
 
 print("Accuracy per Epoch : \n")
 train_acc=history.history["accuracy"]
@@ -48,9 +70,9 @@ plt.show()
 y_pred=model.predict(x_test)
 y_pred = (y_pred > 0.5)
 
-
 #evaluation 
 from sklearn.metrics import accuracy_score,confusion_matrix
 print("Accuracy Score : ",accuracy_score(y_test,y_pred))
 print("Confusion Matrix : ")
 print(confusion_matrix(y_test,y_pred))
+

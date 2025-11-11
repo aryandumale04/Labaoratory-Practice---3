@@ -1,0 +1,46 @@
+
+import seaborn as sns
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, roc_auc_score
+
+
+
+
+
+df = sns.load_dataset("titanic")
+df = df[["survived", "pclass", "sex", "age", "fare", "embarked"]]  # keep only useful columns
+df.dropna(inplace=True)  # remove missing values
+
+#  Encode categorical columns
+le = LabelEncoder()
+df["sex"] = le.fit_transform(df["sex"])
+df["embarked"] = le.fit_transform(df["embarked"])
+
+# Split features & target
+X = df.drop("survived", axis=1)
+y = df["survived"]
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+#  Normalize numeric features
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+#  Train Random Forest model
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+#  Make predictions
+y_pred = model.predict(X_test)
+y_proba = model.predict_proba(X_test)[:, 1]
+
+#  Evaluation
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("ROC-AUC Score:", roc_auc_score(y_test, y_proba))
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))

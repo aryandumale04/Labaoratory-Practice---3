@@ -1,0 +1,60 @@
+#prerequisite
+import seaborn as sns
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+import warnings
+warnings.filterwarnings("ignore")
+
+#dataset to data frame
+data = sns.load_dataset("iris")
+df = pd.DataFrame(data)
+df
+
+#kmeans need only numeric values so selecting only those columns
+x=df.select_dtypes(include=["float64"])
+x
+
+#scaling so that each feature contributes equally 
+scaler=StandardScaler()
+x_scaled=scaler.fit_transform(x)
+
+
+
+#determine k to perform k means clustering 
+inertia=[]
+K = range(1,11)
+for k in K :
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    kmeans.fit(x_scaled)
+    inertia.append(kmeans.inertia_)
+import matplotlib.pyplot as plt
+plt.plot(K,inertia,marker="o")
+plt.xlabel("Number of Clusters(K)")
+plt.ylabel("Inertia")
+plt.title("Elbow Method")
+plt.show()
+
+
+#verify using silhoutte score
+from sklearn.metrics import silhouette_score
+K = range(2,11)
+for k in K : 
+    kmeans = KMeans(n_clusters=k,random_state=42,n_init=10)
+    labels =  kmeans.fit_predict(x_scaled)
+    sil =  silhouette_score(x_scaled,labels)
+    print(f" For K = {k} -  Silhouette Score = {sil}")
+
+#perform k means clustering 
+kmeans=KMeans(n_clusters=3,random_state=42)
+df["cluster"] = kmeans.fit_predict(x_scaled)
+
+
+
+#visualise the data now based on the cluster column created just now 
+plt.scatter(x_scaled[:,0],x_scaled[:,1],c=df["cluster"],cmap="viridis")
+plt.xlabel("Sepal Length")
+plt.ylabel("Sepal Width")
+plt.title("K Means Clustering (K=3)")
+plt.show()

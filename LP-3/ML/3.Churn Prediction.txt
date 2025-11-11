@@ -1,0 +1,56 @@
+#prerequisites
+import pandas as pd
+import numpy as np
+import warnings
+warnings.filterwarnings("ignore")
+df= pd.read_csv("Churn_Modelling.csv")
+df
+
+
+#divide the dataset 
+x=df.iloc[:,3:13]
+y=df.iloc[:,13]
+
+#endcoding 
+from sklearn.preprocessing import LabelEncoder
+
+
+labelEncoder = LabelEncoder()
+x["Gender"] = labelEncoder.fit_transform(x["Gender"])
+#one-hot
+x = pd.get_dummies(x,columns=["Geography"],drop_first=True)
+
+#split the data and then notrmalise it 
+from sklearn.model_selection import train_test_split
+x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=42)
+
+from sklearn.preprocessing import StandardScaler 
+scaler = StandardScaler()
+x_train=scaler.fit_transform(x_train)
+x_test=scaler.transform(x_test)
+
+history=model.fit(x_train,y_train,epochs=20,batch_size=32,validation_data=(x_test,y_test))
+
+print("Accuracy per Epoch : \n")
+train_acc=history.history["accuracy"]
+val_acc=history.history["val_accuracy"]
+for i in range(len(train_acc)):
+    print(f"Epoch {i+1} -> Training Accuracy : {train_acc[i]*100:.2f}% , Validation Accuracy : {val_acc[i]*100:.2f}%")
+import matplotlib.pyplot as plt
+plt.plot(history.history["accuracy"],label="Training Accuracy")
+plt.plot(history.history["val_accuracy"],label="Validation Accuracy")
+plt.title("Accuracy per Epoch")
+plt.xlabel="Epoch"
+plt.ylabel="Accuracy"
+plt.legend()
+plt.show()
+
+y_pred=model.predict(x_test)
+y_pred = (y_pred > 0.5)
+
+
+#evaluation 
+from sklearn.metrics import accuracy_score,confusion_matrix
+print("Accuracy Score : ",accuracy_score(y_test,y_pred))
+print("Confusion Matrix : ")
+print(confusion_matrix(y_test,y_pred))
